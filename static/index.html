@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+
+<!--
+  Google HTML5 slide template
+
+  Authors: Luke Mahé (code)
+           Marcin Wichary (code and design)
+           
+           Dominic Mazzoni (browser compatibility)
+           Charles Chen (ChromeVox support)
+
+  URL: http://code.google.com/p/html5slides/
+-->
+
+<html>
+  <head>
+    <title>onGameStart : Intro to Box2D by Seth Ladd</title>
+
+    <meta charset='utf-8'>
+    <script src='slides.js'></script>
+    
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-25919970-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    
+    <script type="text/javascript">
+  	window.addEventListener('slideenter', function(e) {
+        var slideNumber = e.slideNumber;
+        _gaq.push(['_trackPageview', '#'+slideNumber]);
+      });
+  	</script>
+  </head>
+  
+  <script>
+  var transientIframe = function(slideId, url) {
+    iframeId = slideId + "-iframe";
+    var slide = document.getElementById(slideId);
+    slide.addEventListener("slideenter", function() {
+      if (document.getElementById(iframeId)) {
+        return;
+      }
+      var iframe = document.createElement("iframe");
+      iframe.src = url;
+      iframe.id = iframeId;
+      slide.appendChild(iframe);
+    });
+    slide.addEventListener("slideleave", function() {
+      var iframe = document.getElementById(iframeId);
+      if (iframe) {
+        iframe.parentNode.removeChild(iframe);
+      }
+    });
+  }
+  </script>
+  
+  <style>
+    /* Your individual styles here, or just use inline styles if that’s
+       what you want. */
+    
+       .slides > article:not(.fill)::before {
+         content: '';
+         display: block;
+         width: 100px;
+         height: 100px;
+         position: absolute;
+         left: 0;
+         bottom: 0;
+         background: url(images/html5-logo-65x65.png) 30px 20px no-repeat;
+       }
+    
+  </style>
+
+  <body style='display: none'>
+
+    <section class='slides layout-regular template-default'>
+      
+      <!-- Your slides (<article>s) go here. Delete or comment out the
+           slides below. -->
+
+      <article>
+        <h1>
+          Intro to Box2D
+          <br>
+          <span style="font-size:0.5em">physics simulations for HTML5 games</span>
+        </h1>
+        <p>
+          Seth Ladd
+          <br>
+          Sept 23, 2011
+        </p>
+      </article>
+      
+      <article>
+        <h2>My Goal: Make Box2D approachable and not scary</h2>
+      </article>
+      
+      <article>
+        <h3>
+          Hello! Cześć!
+        </h3>
+        <img src="/images/sethladd-avatar.png" alt="Seth Ladd Portrait" style="float:right">
+        <ul>
+          <li>
+            Developer Advocate at Google
+          </li>
+          <li>
+            Co-producer, <a href="http://newgameconf.com">New Game</a> Conf
+          </li>
+          <li>
+            Academy of Interactive Arts and Sciences, Board member
+          </li>
+          <li>
+            Developer, Angry Birds HTML5
+          </li>
+          <li>
+            Favorite Game: Super Puzzle Fighter 2 Turbo HD Remix
+            <ul>
+              <li style="font-size:0.5em">Someone please port it to WebGL and Websockets kthxbai!!1</li>
+            </ul>
+          </li>
+          <li>
+            <a href="http://twitter.com/sethladd">@sethladd</a>
+          </li>
+          <li>
+            <a href="http://profiles.google.com/sethladd">+sethladd</a>
+          </li>
+        </ul>
+      </article>
+      
+      <article class='fill' id="box2d-demo">
+        <h3>Box2D demo</h3>
+        <script>
+          transientIframe("box2d-demo", "http://box2d-javascript-fun.appspot.com/14/index.html");
+        </script>
+      </article>
+      
+      <article>
+        <h3>What is Box2D?</h3>
+        <ul>
+          <li>Open source</li>
+          <li>2D</li>
+          <li>Rigid bodies</li>
+          <li>Physics simulation</li>
+          <li>With goodies</li>
+          <li>Used in <a href="http://chrome.angrybirds.com" target="_new">Angry Birds</a>, Rolando, others</li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>
+          Why Box2D?
+        </h3>
+        <ul>
+          <li>
+            Real games use it
+          </li>
+          <li>
+            Easier than starting from scratch
+          </li>
+          <li>
+            Lots under the hood: Bodies, collisions, impulses, forces, joints, etc
+          </li>
+          <li>
+            Open source, zlib license
+          </li>
+          <li>
+            Active community
+          </li>
+          <li>
+            Oh so many ports
+          </li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>
+          Thank you Erin!
+        </h3>
+        <ul>
+          <li>Erin Catto's GDC presentations</li>
+          <li>Open sourced in 2007</li>
+          <li>Active in the forums</li>
+          <li>Continues to release updates</li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>
+          Box2D and JavaScript
+        </h3>
+        <ul>
+          <li>
+            Two ports for JavaScript, <a href="http://box2d-js.sourceforge.net/" target="_new" style="color:lightgray">box2d-js</a> and <a href="http://code.google.com/p/box2dweb/">box2dweb</a>
+          </li>
+          <li>
+            You probably want box2dweb (one file, more up to date)
+          </li>
+          <li>
+            <a href="http://code.google.com/p/box2dweb/" target="_new">http://code.google.com/p/box2dweb/</a>
+          </li>
+          <li>
+            2.1a most current JavaScript version (2.2 most current C version)
+          </li>
+        </ul>
+      </article>
+      
+      <article>
+        <h2>Prereq</h2>
+      </article>
+      
+      <article>
+        <h3>Animating with requestAnimationFrame</h3>
+        <section>
+        <pre><code>// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+window.requestAnimFrame = (function(){
+      return  window.requestAnimationFrame       || 
+              window.webkitRequestAnimationFrame || 
+              window.mozRequestAnimationFrame    || 
+              window.oRequestAnimationFrame      || 
+              window.msRequestAnimationFrame     || 
+              function(/* function */ callback, /* DOMElement */ element){
+                window.setTimeout(callback, 1000 / 60);
+              };
+})();
+</code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h2>Orientation</h2>
+      </article>
+      
+      <article>
+        <h3>
+          Box2D basic concepts and classes
+        </h3>
+        <p>
+          <img src="images/box2d-core-concepts.png" class="centered" alt="World - Body - Fixture - Shape">
+        </p>
+      </article>
+      
+      <article>
+        <h3>
+          Box2D and real world units
+        </h3>
+        <ul>
+          <li>Kilograms</li>
+          <li>Meters</li>
+          <li>Seconds</li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>
+          Box2D and scale
+        </h3>
+        <ul>
+          <li>Stick between Android phones to school buses
+            <ul>
+              <li>0.1 m to 10 m</li>
+            </ul>
+            </li>
+          <li>Avoid dust particles and skyscrapers</li>
+          <li>Meters DO NOT equal pixels</li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>
+          Stepping through the world
+        </h3>
+        <ul>
+          <li>Time step freq: 60Hz</li>
+          <li>Velocity iterations: 8</li>
+          <li>Position iterations: 3</li>
+          <li>Performance and accuracy tradeoffs... experiment!</li>
+        </ul>
+      </article>
+      
+      <article>
+        <h2>Basic code walkthrough</h2>
+      </article>
+      
+      <article>
+        <h3>Initialize the world</h3>
+        <section>
+        <pre><code>
+world = new b2World(
+      new b2Vec2(0, 10)    // gravity vector
+   ,  true                 // allow sleeping bodies
+);
+
+var SCALE = 30; // 30 pixels to 1 meter
+        </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Define FixtureDef</h3>
+        <section>
+          <pre><code>
+var fixDef = new b2FixtureDef;
+fixDef.density = 1.0;
+fixDef.friction = 0.5;
+fixDef.restitution = 0.2;
+          </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Specify the ground</h3>
+        <section>
+          <pre><code>
+var bodyDef = new b2BodyDef;
+
+//create ground
+bodyDef.type = b2Body.b2_staticBody;
+
+// positions the center of the object (not upper left!)
+bodyDef.position.x = canvas.width / 2 / SCALE;
+bodyDef.position.y = (canvas.height / SCALE) - 1;
+
+fixDef.shape = new b2PolygonShape;
+
+// half width, half height.
+fixDef.shape.SetAsBox((canvas.width / SCALE) / 2, 0.5 / 2);
+
+world.CreateBody(bodyDef).CreateFixture(fixDef);
+            </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Units on screen</h3>
+        <p>
+          <img class='centered' width="800" src='images/box2d-units.png' alt="Measurements of units on canvas">
+        </p>
+      </article>
+      
+      <article>
+        <h3>Specify a dynamic circle</h3>
+        <section>
+          <pre><code>
+bodyDef.type = b2Body.b2_dynamicBody;
+fixDef.shape = new b2CircleShape(
+   Math.random() + 0.1 //radius
+);
+bodyDef.position.x = Math.random() * 25;
+bodyDef.position.y = Math.random() * 10;
+world.CreateBody(bodyDef).CreateFixture(fixDef);
+            </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Specify a dynamic rectangle</h3>
+        <section>
+          <pre><code>
+bodyDef.type = b2Body.b2_dynamicBody;
+fixDef.shape = new b2PolygonShape;
+fixDef.shape.SetAsBox(
+      Math.random() + 0.1 //half width
+   ,  Math.random() + 0.1 //half height
+);
+bodyDef.position.x = Math.random() * 25;
+bodyDef.position.y = Math.random() * 10;
+world.CreateBody(bodyDef).CreateFixture(fixDef);
+            </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Debug draw (for testing only, not for real game)</h3>
+        <section>
+          <pre><code>
+//setup debug draw
+var debugDraw = new b2DebugDraw();
+debugDraw.SetSprite(document.getElementById("c").getContext("2d"));
+debugDraw.SetDrawScale(SCALE);
+debugDraw.SetFillAlpha(0.3);
+debugDraw.SetLineThickness(1.0);
+debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
+world.SetDebugDraw(debugDraw);
+            </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Update world</h3>
+        <section>
+          <pre><code>
+function update() {
+   world.Step(
+         1 / 60   //frame-rate
+      ,  10       //velocity iterations
+      ,  10       //position iterations
+   );
+   world.DrawDebugData();
+   world.ClearForces();
+
+   stats.update();
+   requestAnimFrame(update);
+}; // update()
+          </code></pre>
+        </section>
+      </article>
+      
+      <article class="fill" id="box2d-00">
+        <h3>Result</h3>
+        <script>
+          transientIframe("box2d-00", "http://box2d-javascript-fun.appspot.com/00/index.html");
+        </script>
+      </article>
+      
+      <article class="fill" id="box2d-01-01">
+        <h3><a href="http://box2d-javascript-fun.appspot.com/01.01/index.html" target="_new">Decyphering time step, velocity, position</a></h3>
+        <script>
+          transientIframe("box2d-01-01", "http://box2d-javascript-fun.appspot.com/01.01/index.html");
+        </script>
+      </article>
+      
+      <article>
+        <h2>
+          Advanced shapes
+        </h2>
+      </article>
+      
+      <article>
+        <h3>Polygons</h3>
+        <ul>
+          <li>
+            Points are relative to position x,y
+          </li>
+          <li>
+            Defined clockwise for HTML5 canvas
+          </li>
+          <li>
+            Convex shapes only
+          </li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>Polygons Code</h3>
+        <section>
+          <pre><code>
+var points = [{x: 0, y: 0}, {x: 1, y: 0}, {x: 0, y:2}];
+for (var i = 0; i &lt; points.length; i++) {
+    var vec = new b2Vec2();
+    vec.Set(points[i].x, points[i].y);
+    points[i] = vec;
+}
+this.fixDef.shape = new b2PolygonShape;
+this.fixDef.shape.SetAsArray(points, points.length);
+this.bodyDef.position.x = 5;
+this.bodyDef.position.y = 5;
+this.world.CreateBody(this.bodyDef).CreateFixture(this.fixDef);
+          </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Polygon points and position</h3>
+        <p>
+          <img class="centered" width="800" src="images/box2d-polygon-positions.png">
+        </p>
+      </article>
+      
+      <article class="fill" id="box2d-07">
+        <h3>Polygons in action</h3>
+        <script>
+          transientIframe("box2d-07", "http://box2d-javascript-fun.appspot.com/07/index.html");
+        </script>
+      </article>
+      
+      <article>
+        <h3>More complex bodies</h3>
+        <p>
+          <img src="images/box2d-body-fixtures-shapes.png" width="600" class="centered">
+        </p>
+      </article>
+      
+      <article>
+        <h3>Complex bodies code</h3>
+        <section>
+          <pre><code>
+var entity = "4": {id: 4, x: 10, y: 10, polys: [
+    [{x: -1, y: -1}, {x: 1, y: -1}, {x: 1, y: 1}, {x: -1, y: 1}], // box
+    [{x: 1, y: -1.5}, {x: 2, y: 0}, {x: 1, y: 1.5}]  // arrow
+]};
+for (var j = 0; j &lt; entity.polys.length; j++) {
+    var points = entity.polys[j];
+    var vecs = [];
+    for (var i = 0; i &lt; points.length; i++) {
+        var vec = new b2Vec2();
+        vec.Set(points[i].x, points[i].y);
+        vecs[i] = vec;
+    }
+    this.fixDef.shape = new b2PolygonShape;
+    this.fixDef.shape.SetAsArray(vecs, vecs.length);
+    body.CreateFixture(this.fixDef);
+}
+          </code></pre>
+        </section>
+      </article>
+      
+      <article class="fill" id="box2d-08">
+        <h3>Complex bodies in action</h3>
+        <script>
+          transientIframe("box2d-08", "http://box2d-javascript-fun.appspot.com/08/index.html");
+        </script>
+      </article>
+      
+      <article>
+        <h2>Drawing onto Canvas</h2>
+      </article>
+      
+      <article>
+        <h3>Separate entities and bodies</h3>
+        <ul>
+          <li>Use body's GetUserData() to link entity</li>
+          <li>Treat Box2D bodies as just physics simulation</li>
+          <li>Perform drawing outside of Box2D</li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>Simple entities</h3>
+        <p>
+          <img class="centered" src="images/box2d-entity-bodies.png" alt="Entity class hierarchy with update and draw methods" width="770">
+        </p>
+      </article>
+      
+      <article>
+        <h3>Step 1: Rotate canvas for body angle</h3>
+        <section>
+          <pre><code>
+ctx.save();
+ctx.translate(this.x * SCALE, this.y * SCALE);
+ctx.rotate(this.angle);
+ctx.translate(-(this.x) * SCALE, -(this.y) * SCALE);
+ctx.fillStyle = this.color;
+          </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Step 2: Draw lines for polygon</h3>
+        <section>
+          <pre><code>
+for (var i = 0; i &lt; this.polys.length; i++) {
+  var points = this.polys[i];
+  ctx.beginPath();
+  ctx.moveTo((this.x + points[0].x) * SCALE,
+             (this.y + points[0].y) * SCALE);
+  for (var j = 1; j &lt; points.length; j++) {
+     ctx.lineTo((points[j].x + this.x) * SCALE,
+                (points[j].y + this.y) * SCALE);
+  }
+  ctx.lineTo((this.x + points[0].x) * SCALE,
+             (this.y + points[0].y) * SCALE);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+ctx.restore();
+          </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <img src="images/box2d-canvas-rendering.png" class="centered" alt="canvas api rendering order">
+      </article>
+      
+      <article>
+        <h2>
+          Joints
+        </h2>
+      </article>
+      
+      <article>
+        <h3>Constrain bodies with joints</h3>
+        <ul>
+          <li>Distance</li>
+          <li>Friction</li>
+          <li>Gear</li>
+          <li>Line</li>
+          <li>Mouse</li>
+          <li>Prismatic</li>
+          <li>Pulley</li>
+          <li>Revolute</li>
+          <li>Weld</li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>Distance Joint</h3>
+        <ul>
+          <li>Distance between two bodies is constant</li>
+        </ul>
+        <p>
+          <img src="images/box2d-distance-joint.png" alt="two objects constrainted by distance" class="centered">
+        </p>
+        
+        <section>
+          <pre><code>
+joint.Initialize(body1, body2, body1.GetWorldCenter(), body2.GetWorldCenter());
+joint.frequencyHz = params['frequencyHz']; // optional, less than half of time step
+joint.dampingRatio = params['dampingRatio']; // optional, 0 - 1
+this.world.CreateJoint(joint);
+          </code></pre>
+        </section>
+        
+        <p>
+          <span style="font-size: 0.5em">(pic from <a href="http://www.box2d.org/manual.html">Box2d manual</a>)</span>
+        </p>
+      </article>
+      
+      <article id="box2d-13">
+        <h3>Distance joint example</h3>
+        <script>
+          transientIframe("box2d-13", "http://box2d-javascript-fun.appspot.com/13/index.html");
+        </script>
+      </article>
+      
+      <article>
+        <h3>Revolute joint</h3>
+        <ul>
+          <li>Two bodies revolve around the same point</li>
+          <li>Optional motor, configurable torque</li>
+          <li>Optional limits</li>
+        </ul>
+        <section>
+          <pre><code>
+var joint = new b2RevoluteJointDef();
+// both body1 and body2 already in correct position
+joint.Initialize(body1, body2, body1.GetWorldCenter());
+joint.motorSpeed = params.motorSpeed; // negative for opposite direction
+joint.maxMotorTorque = params.maxMotorTorque;
+joint.enableMotor = true;
+this.world.CreateJoint(joint);
+          </code></pre>
+        </section>
+      </article>
+      
+      <article id="box2d-14">
+        <h3>Revolute joint in action</h3>
+        <script>
+          transientIframe("box2d-14", "http://box2d-javascript-fun.appspot.com/14/index.html");
+        </script>
+      </article>
+      
+      <article id="box2d-15">
+        <h3>Pulley joint in action</h3>
+        <script>
+          transientIframe("box2d-15", "http://box2d-javascript-fun.appspot.com/15/index.html");
+        </script>
+      </article>
+      
+      <article>
+        <h2>Make it jump</h2>
+      </article>
+      
+      <article>
+        <h3>Impulse and force</h3>
+        <ul>
+          <li><code>ApplyForce</code> - slowly over time, pushing</li>
+          <li><code>ApplyImpulse</code> - immediate, hit by a bat</li>
+          <li>Vector for direction and magnitude</li>
+          <li>Point for where load is applied</li>
+        </ul>
+        <section>
+          <pre><code>
+bTest.prototype.applyImpulse = function(body, degrees, power) {
+  body.ApplyImpulse(new b2Vec2(Math.cos(degrees * (Math.PI / 180)) * power,
+                               Math.sin(degrees * (Math.PI / 180)) * power),
+                               body.GetWorldCenter());
+}
+          </code></pre>
+        </section>
+      </article>
+      
+      <article id="box2d-11">
+        <h3>Impulse in action</h3>
+        <script>
+          transientIframe("box2d-11", "http://box2d-javascript-fun.appspot.com/11/index.html");
+        </script>
+      </article>
+      
+      <article>
+        <h2>Hit me body, one more time</h2>
+      </article>
+      
+      <article>
+        <h3>b2ContactListener</h3>
+        <ul>
+          <li><code>BeginContact</code></li>
+          <li><code>EndContact</code></li>
+          <li><code>PreSolve</code> - can override the contact here</li>
+          <li><code>PostSolve</code> - includes the impulse</li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>Contact tips and code</h3>
+        <ul>
+          <li>Events fired during world step, avoid manipulating world</li>
+          <li>EndContact can be fired outside of world step</li>
+          <li>PostSolve called a LOT</li>
+        </ul>
+        
+        <section>
+          <pre><code>
+var listener = new Box2D.Dynamics.b2ContactListener;
+listener.BeginContact = function(contact) {
+  console.log(contact.GetFixtureA().GetBody().GetUserData());
+  console.log(contact.GetFixtureB().GetBody().GetUserData());
+};
+this.world.SetContactListener(listener);
+          </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>How strong?</h3>
+        <ul>
+          <li>BeginContact - linearVelocity and mass</li>
+          <li>PostSolve - impulse</li>
+        </ul>
+        <section>
+          <pre><code>
+listener.PostSolve = function(contact, impulse) {
+  var impulseValue = impulse.normalImpulses[0];
+  if (impulseValue &lt; 0.1) return;
+  var object = contact.GetFixtureA().GetBody().GetUserData();
+  object.applyHit(impulseValue);
+};
+          </code></pre>
+        </section>
+      </article>
+      
+      <article id="box2d-12">
+        <h3>Collisions in action</h3>
+        <script>
+          transientIframe("box2d-12", "http://box2d-javascript-fun.appspot.com/12/index.html");
+        </script>
+      </article>
+      
+      <article>
+        <h2>
+          Parallelizing
+        </h2>
+      </article>
+      
+      <article>
+        <h3>Web workers</h3>
+        <ul>
+          <li>JavaScript in a separate process</li>
+          <li>postMessage() communication</li>
+        </ul>
+        <iframe src="http://caniuse.com/webworkers/embed/" style="height:300px"></iframe>
+      </article>
+      
+      <article>
+        <h3>Box2D in a worker</h3>
+        <section>
+          <pre><code>
+worker = new Worker('physics.js');
+
+// bootstrap box
+worker.postMessage({'cmd': 'bodies', 'msg': world});
+
+// get updates from worker
+worker.onmessage = function(e) {
+  bodiesState = e.data.worldBodies;
+};
+          </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Box2D in a worker (cont)</h3>
+        <section>
+          <pre><code>
+function update(animStart) {
+  // request a new frame
+  worker.postMessage({'cmd':'req', 'id': msgId++});
+
+  // copy state onto local objects
+  for (var id in bodiesState) {
+    var entity = world[id];
+    if (entity) entity.update(bodiesState[id]);
+  }
+}
+          </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>Inside the worker</h3>
+        <section>
+          <pre><code>
+self.onmessage = function(e) {
+    switch (e.data.cmd) {
+      case 'bodies':
+        box.setBodies(e.data.msg);
+        break;
+      case 'req':
+        var timing = box.update();
+        var world = box.getState();
+        postMessage({"t": timing, "w": world, "id": e.data.id});
+        break;  
+    }
+};
+          </code></pre>
+        </section>
+      </article>
+      
+      <article>
+        <h3>In action</h3>
+        <ul>
+          <li><a href="http://box2d-javascript-fun.appspot.com/06/index.html" target="_new">Box2D and Web workers example</a></li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>Under the covers</h3>
+        <ul>
+          <li>Use the Developer Tools to see timing</li>
+          <li>Paint: drawing</li>
+          <li>Function call: Worker callback</li>
+        </ul>
+        <p>
+          <img src="images/web-worker-timeline.png" class="centered" alt="execution timeline with paint/callback/paint/callback">
+        </p>
+      </article>
+      
+      <article>
+        <h2>
+          Summary
+        </h2>
+      </article>
+      
+      <article>
+        <h3>
+          More info
+        </h3>
+        <ul>
+          <li><a href="http://www.box2d.org/manual.html">Box2D Manual</a></li>
+          <li><a href="http://www.box2d.org/forum/index.php">Box2D Forums</a></li>
+          <li><a href="http://www.iforce2d.net/b2dtut/">Box2D C++ Tutorials</a></li>
+          <li><a href="http://blog.sethladd.com/search/label/box2d">My Box2D blog posts</a></li>
+          <li>API is nearly identical, almost any article or tutorial will work</li>
+          <li>Beware Box2D versions, some APIs are different</li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>Key points</h3>
+        <ul>
+          <li>
+            Box2D is approachable, lots of articles, and many literal ports
+          </li>
+          <li>
+            MKS units, 0.1m to 10m, don't use pixels
+          </li>
+          <li>
+            Lots of goodies: joints, collisions, impulses, ray casting, etc
+          </li>
+          <li>
+            Active community!
+          </li>
+          <li>
+            <strong>Lots of values to tweak for the feel of your game</strong>
+          </li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>
+          Join us at <a href="http://www.newgameconf.com" target="_new">New Game</a>. Use <span style="color:red">coupon HTML5ROCKS</span> for 15% off registration
+        </h3>
+        <p>
+          <img class='centered' width="550" src='images/new-game-logo-large.png' alt="New Game Logo">
+        </p>
+      </article>
+      
+      <article>
+        <h3>
+          Thanks! Dziękuję!
+        </h3>
+        <ul>
+          <li>Slides: <a href="http://bit.ly/ongamestart-box2d" title="Slides for this presentation">http://bit.ly/ongamestart-box2d</a></li>
+          <li>Source code: <a href="https://github.com/sethladd/box2d-javascript-fun">https://github.com/sethladd/box2d-javascript-fun</a></li>
+          <li><a href="http://twitter.com/sethladd" title="Seth Ladd's twitter account">@sethladd</a></li>
+          <li><a href="http://profiles.google.com/sethladd" title="Seth Ladd's Google+ profile page">+sethladd</a></li>
+          <li>Serious, Super Puzzle Fighter in WebGL with Websockets. Think about it.</li>
+        </ul>
+      </article>
+      
+      <!--
+      <article>
+        <p>
+          This is a slide with just text. This is a slide with just text.
+          This is a slide with just text. This is a slide with just text.
+          This is a slide with just text. This is a slide with just text.
+        </p>
+        <p>
+          There is more text just underneath.
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          Simple slide with header and text
+        </h3>
+        <p>
+          This is a slide with just text. This is a slide with just text.
+          This is a slide with just text. This is a slide with just text.
+          This is a slide with just text. This is a slide with just text.
+        </p>
+        <p>
+          There is more text just underneath with a <code>code sample: 5px</code>.
+        </p>
+      </article>
+
+      <article class='smaller'>
+        <h3>
+          Simple slide with header and text (small font)
+        </h3>
+        <p>
+          This is a slide with just text. This is a slide with just text.
+          This is a slide with just text. This is a slide with just text.
+          This is a slide with just text. This is a slide with just text.
+        </p>
+        <p>
+          There is more text just underneath with a <code>code sample: 5px</code>.
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          Slide with bullet points and a longer title, just because we
+          can make it longer
+        </h3>
+        <ul>
+          <li>
+            Use this template to create your presentation
+          </li>
+          <li>
+            Use the provided color palette, box and arrow graphics, and
+            chart styles
+          </li>
+          <li>
+            Instructions are provided to assist you in using this
+            presentation template effectively
+          </li>
+          <li>
+            At all times strive to maintain Google's corporate look and feel
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>
+          Slide with bullet points that builds
+        </h3>
+        <ul class="build">
+          <li>
+            This is an example of a list
+          </li>
+          <li>
+            The list items fade in
+          </li>
+          <li>
+            Last one!
+          </li>
+        </ul>
+
+        <div class="build">
+          <p>Any element with child nodes can build.</p>
+          <p>It doesn't have to be a list.</p>
+        </div>
+      </article>
+
+      <article class='smaller'>
+        <h3>
+          Slide with bullet points (small font)
+        </h3>
+        <ul>
+          <li>
+            Use this template to create your presentation
+          <li>
+            Use the provided color palette, box and arrow graphics, and
+            chart styles
+          <li>
+            Instructions are provided to assist you in using this
+            presentation template effectively
+          <li>
+            At all times strive to maintain Google's corporate look and feel
+        </ul>
+      </article>
+
+      <article>
+        <h3>
+          Slide with a table
+        </h3>
+        
+        <table>
+          <tr>
+            <th>
+              Name
+            <th>
+              Occupation
+          <tr>
+            <td>
+              Luke Mahé
+            <td>
+              V.P. of Keepin’ It Real
+          <tr>
+            <td>
+              Marcin Wichary
+            <td>
+              The Michael Bay of Doodles
+        </table>
+      </article>
+      
+      <article class='smaller'>
+        <h3>
+          Slide with a table (smaller text)
+        </h3>
+        
+        <table>
+          <tr>
+            <th>
+              Name
+            <th>
+              Occupation
+          <tr>
+            <td>
+              Luke Mahé
+            <td>
+              V.P. of Keepin’ It Real
+          <tr>
+            <td>
+              Marcin Wichary
+            <td>
+              The Michael Bay of Doodles
+        </table>
+      </article>
+      
+      <article>
+        <h3>
+          Styles
+        </h3>
+        <ul>
+          <li>
+            <span class='red'>class="red"</span>
+          <li>
+            <span class='blue'>class="blue"</span>
+          <li>
+            <span class='green'>class="green"</span>
+          <li>
+            <span class='yellow'>class="yellow"</span>
+          <li>
+            <span class='black'>class="black"</span>
+          <li>
+            <span class='white'>class="white"</span>
+          <li>
+            <b>bold</b> and <i>italic</i>
+        </ul>
+      </article>
+      
+      <article>
+        <h2>
+          Segue slide
+        </h2>
+      </article>
+
+      <article>
+        <h3>
+          Slide with an image
+        </h3>
+        <p>
+          <img style='height: 500px' src='images/example-graph.png'>
+        </p>
+        <div class='source'>
+          Source: Sergey Brin
+        </div>
+      </article>
+
+      <article>
+        <h3>
+          Slide with an image (centered)
+        </h3>
+        <p>
+          <img class='centered' style='height: 500px' src='images/example-graph.png'>
+        </p>
+        <div class='source'>
+          Source: Larry Page
+        </div>
+      </article>
+
+      <article class='fill'>
+        <h3>
+          Image filling the slide (with optional header)
+        </h3>
+        <p>
+          <img src='images/example-cat.jpg'>
+        </p>
+        <div class='source white'>
+          Source: Eric Schmidt
+        </div>
+      </article>
+
+      <article>
+        <h3>
+          This slide has some code
+        </h3>
+        <section>
+        <pre>
+&lt;script type='text/javascript'&gt;
+  // Say hello world until the user starts questioning
+  // the meaningfulness of their existence.
+  function helloWorld(world) {
+    for (var i = 42; --i &gt;= 0;) {
+      alert('Hello ' + String(world));
+    }
+  }
+&lt;/script&gt;
+&lt;style&gt;
+  p { color: pink }
+  b { color: blue }
+  u { color: 'umber' }
+&lt;/style&gt;
+</pre>
+        </section>
+      </article>
+      
+      <article class='smaller'>
+        <h3>
+          This slide has some code (small font)
+        </h3>
+        <section>
+        <pre>
+&lt;script type='text/javascript'&gt;
+  // Say hello world until the user starts questioning
+  // the meaningfulness of their existence.
+  function helloWorld(world) {
+    for (var i = 42; --i &gt;= 0;) {
+      alert('Hello ' + String(world));
+    }
+  }
+&lt;/script&gt;
+&lt;style&gt;
+  p { color: pink }
+  b { color: blue }
+  u { color: 'umber' }
+&lt;/style&gt;
+</pre>
+        </section>
+      </article>
+      
+      <article>
+        <q>
+          The best way to predict the future is to invent it.
+        </q>
+        <div class='author'>
+          Alan Kay
+        </div>
+      </article>
+      
+      <article class='smaller'>
+        <q>
+          A distributed system is one in which the failure of a computer 
+          you didn’t even know existed can render your own computer unusable.
+        </q>
+        <div class='author'>
+          Leslie Lamport
+        </div>
+      </article>
+      
+      <article class='nobackground'>
+        <h3>
+          A slide with an embed + title
+        </h3>
+        
+        <iframe src='http://www.google.com/doodle4google/history.html'></iframe>
+      </article>
+
+      <article class='nobackground'>
+        <iframe src='http://www.google.com/doodle4google/history.html'></iframe>
+      </article>
+
+      <article class='fill'>
+        <h3>
+          Full-slide embed with (optional) slide title on top
+        </h3>
+        <iframe src='http://www.google.com/doodle4google/history.html'></iframe>
+      </article>
+      
+      <article>
+        <h3>
+          Thank you!
+        </h3>
+        
+        <ul>
+          <li>
+            <a href='http://www.google.com'>google.com</a>
+        </ul>
+      </article>
+      
+      -->
+
+    </section>
+
+  </body>
+</html>
