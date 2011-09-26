@@ -97,7 +97,7 @@ body {
 }
 
 .slides.template-default > article:not(.nobackground):not(.biglogo) {
-  background: url(images/ongamestart-logo.png) 670px 625px no-repeat;  
+  background: url(images/html5devconf-logo.png) 750px 625px no-repeat;  
   
   background-color: white;  
 } 
